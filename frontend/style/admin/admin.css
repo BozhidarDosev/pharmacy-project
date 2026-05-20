@@ -1,0 +1,46 @@
+.tab-btn {
+    padding: 7px 16px;
+    border: 0.5px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tab-btn:hover {
+    background: #eff6ff;
+    border-color: #1e3a5f;
+    color: #1e3a5f;
+}
+
+.active-tab {
+    background: #1e3a5f !important;
+    color: white !important;
+    border-color: #1e3a5f !important;
+}
+
+.buttonSwitchView {
+    background:rgba(255,255,255,0.12);
+    border:0.5px solid rgba(255,255,255,0.25);
+    color:white;
+    padding:5px 14px;
+    border-radius:6px;
+    font-size:13px;
+    cursor:pointer;
+    margin-right:6px
+}
+
+.logout-btn {
+  background:#e24b4a;
+  border:none;
+  color:white;
+  padding:5px 14px;
+  border-radius:6px;
+  font-size:13px;
+  cursor:pointer
+}
+
+.section { display: block; }
+.section.hidden { display: none; }

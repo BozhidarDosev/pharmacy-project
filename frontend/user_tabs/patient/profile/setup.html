@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Попълни профила си</title>
+    <link rel="stylesheet" href="/style/patient/setup.css">
+    <script src="/scripts/patient/setup.js" type="module"></script>
+    <script src="/scripts/auth/header_data.js" type="module"></script>
+</head>
+<body>
+
+<nav style="background: #6b21a8;color:white;padding:12px 24px;display:flex;justify-content:space-between;align-items:center">
+    <h1 style="font-size:16px;font-weight:500">Верификация на данните</h1>
+    <div style="display:flex;align-items:center;gap:8px">
+        <span id="user-name" style="font-size:13px;opacity:0.85"></span>
+        <button disabled="true" onclick="window.location.href='/user_tabs/admin/admin.html';"
+            id="admin-panel-btn" class="nav-btn" hidden>
+            Админ панел
+        </button>
+        <button onclick="logout()" class="logout-btn">Изход</button>
+    </div>
+</nav>
+
+<div class="page-wrapper">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-icon">🏥</span>
+            <h2>Попълни своя профил</h2>
+            <p>Моля попълни данните си за да продължиш</p>
+        </div>
+
+        <div class="error" id="error-msg"></div>
+
+        <div class="form-group">
+            <label for="name">Име и фамилия</label>
+            <input type="text" id="name" placeholder="Иван Иванов"/>
+        </div>
+
+        <div class="form-group">
+            <label for="egn">ЕГН</label>
+            <input type="text" id="egn" placeholder="0000000000" maxlength="10"/>
+        </div>
+
+        <div class="form-group">
+            <label>Осигурявате ли се (за последните 6 месеца)</label>
+            <select type="insured" id="insured"></select>
+        </div>
+            
+        <div class="form-group">
+            <label for="personal-doctor">Личен лекар</label>
+            <select id="personal-doctor"></select>
+        </div>
+
+        <button class="submit-btn" onclick="saveProfile()">
+            Запази и продължи
+        </button>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/style/auth/login.css">
+    <script src="/scripts/auth/register.js"></script>
+    
+</head>
+<body>
+<div class="card">
+    <h2>Медицинско досие</h2>
+    <div class="error" id="error-msg"></div>
+    <div class="success" id="success-msg"></div>
+
+    <input type="text" id="username" placeholder="Потребителско име"/>
+    <input type="password" id="password" placeholder="Парола"/>
+    <input type="password" id="confirm-password" placeholder="Потвърди парола"/>
+
+    <container class="buttons"> 
+        <table style="width: 100%; text-align: center;">
+            <tr>
+                <td><button onclick="register()">Регистрирай се</button></td>
+                <td><button onclick="window.location.href = '/user_tabs/login/login.html';">Вход</button></td>
+            </tr>
+    </container>
+</div>
+
+<script>
+</script>
+</body>
+</html>

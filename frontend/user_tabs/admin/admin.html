@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ | Медицинско досие</title>
+    <link rel="stylesheet" href="/style/admin/admin.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <script src="/scripts/admin/admin.js" type="module"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<nav class="bg-blue-900 text-white px-6 py-3 flex justify-between items-center shadow">
+    <h1 class="text-base font-medium">Медицинско досие | Админ</h1>
+    <div class="flex items-center gap-2">
+        <span id="user-name" style="font-size:13px;opacity:0.85"></span>
+        <button onclick="switchView('doctor')" class="buttonSwitchView">Режим лекар</button>
+        <button onclick="switchView('patient')" class="buttonSwitchView">Режим пациент</button>
+        <button onclick="logout()" class="logout-btn">Изход</button>
+    </div>
+</nav>
+
+<div class="container mx-auto py-5 px-4">
+
+    <!-- Метрики -->
+    <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Общо потребители</div>
+            <div class="text-2xl font-medium" id="metric-users">—</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Администратори</div>
+            <div class="text-2xl font-medium" id="metric-admins">—</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Лекари</div>
+            <div class="text-2xl font-medium" id="metric-doctors">—</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+            <div class="text-xs text-gray-500 mb-1">Пациенти</div>
+            <div class="text-2xl font-medium" id="metric-patients">—</div>
+        </div>
+    </div>
+
+    <!-- Табове -->
+    <div class="flex gap-2 mb-4">
+        <button onclick="showTab('users')" id="tab-users" class="tab-btn active-tab">
+            <i class="fas fa-users-cog me-1"></i> Потребители
+        </button>
+        <button onclick="showTab('doctors')" id="tab-doctors" class="tab-btn">
+            <i class="fas fa-user-md me-1"></i> Лекари
+        </button>
+        <button onclick="showTab('patients')" id="tab-patients" class="tab-btn">
+            <i class="fas fa-users me-1"></i> Пациенти
+        </button>
+        <button onclick="showTab('examinations')" id="tab-examinations" class="tab-btn">
+            <i class="fas fa-stethoscope me-1"></i> Прегледи
+        </button>
+        <button onclick="showTab('sickleaves')" id="tab-sickleaves" class="tab-btn">
+            <i class="fas fa-file-medical me-1"></i> Болнични
+        </button>
+        <button onclick="showTab('statistics')" id="tab-statistics" class="tab-btn">
+            <i class="fas fa-chart-bar me-1"></i> Справки
+        </button>
+    </div>
+
+    <!-- Потребители -->
+    <div id="section-users" class="section">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h2 class="text-sm font-medium text-gray-700">Потребители</h2>
+                <input type="text" placeholder="Търси по потребител или роля..."
+                    oninput="filterUsers(this.value)"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:7px 12px;font-size:13px;width:260px"/>
+            </div>
+            <div id="users-table"></div>
+        </div>
+    </div>
+
+    <!-- Лекари -->
+    <div id="section-doctors" class="section hidden">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h2 class="text-sm font-medium text-gray-700">Лекари</h2>
+                <input type="text" placeholder="Търси по име или специализация..."
+                    oninput="filterDoctors(this.value)"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:7px 12px;font-size:13px;width:260px"/>
+            </div>
+            <div id="doctors-table"></div>
+        </div>
+    </div>
+
+    <!-- Пациенти -->
+    <div id="section-patients" class="section hidden">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h2 class="text-sm font-medium text-gray-700">Пациенти</h2>
+                <input type="text" placeholder="Търси по име или ЕГН..."
+                    oninput="filterPatients(this.value)"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:7px 12px;font-size:13px;width:260px"/>
+            </div>
+            <div id="patients-table"></div>
+        </div>
+    </div>
+
+    <!-- Прегледи -->
+    <div id="section-examinations" class="section hidden">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h2 class="text-sm font-medium text-gray-700">Прегледи</h2>
+                <input type="text" placeholder="Търси по диагноза, лекар или пациент..."
+                    oninput="filterExaminations(this.value)"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:7px 12px;font-size:13px;width:300px"/>
+            </div>
+            <div id="examinations-table"></div>
+        </div>
+    </div>
+
+    <!-- Болнични -->
+    <div id="section-sickleaves" class="section hidden">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+            <h2 class="text-sm font-medium text-gray-700 mb-4">Болнични листове</h2>
+            <div id="sickleaves-table"></div>
+        </div>
+    </div>
+
+    <!-- Справки -->
+    <div id="section-statistics" class="section hidden">
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Най-честа диагноза</h2>
+            <button onclick="loadMostCommonDiagnosis()"
+                style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                Покажи
+            </button>
+            <div id="most-common-diagnosis" style="margin-top:12px;font-size:14px;color:#374151"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Пациенти с дадена диагноза</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="diagnosis-input" placeholder="Въведи диагноза"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px;width:220px"/>
+                <button onclick="loadPatientsByDiagnosis()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Търси
+                </button>
+            </div>
+            <div id="patients-by-diagnosis-table" style="margin-top:12px"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Пациенти към личен лекар</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+                <select id="doctor-select"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px;width:220px"></select>
+                <button onclick="loadPatientsByDoctor()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Покажи
+                </button>
+            </div>
+            <div id="patients-by-doctor-table" style="margin-top:12px"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <h2 class="text-sm font-medium text-gray-700 mb-3">Обща стойност платена от пациенти</h2>
+                <button onclick="loadTotalPaidByPatients()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Изчисли
+                </button>
+                <div id="total-paid" style="margin-top:12px;font-size:22px;font-weight:500;color:#1e3a5f"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <h2 class="text-sm font-medium text-gray-700 mb-3">Месец с най-много болнични</h2>
+                <button onclick="loadMonthMostSickLeaves()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Покажи
+                </button>
+                <div id="month-most-sick" style="margin-top:12px;font-size:22px;font-weight:500;color:#1e3a5f"></div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <h2 class="text-sm font-medium text-gray-700 mb-3">Лекар с най-много болнични</h2>
+                <button onclick="loadDoctorMostSickLeaves()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Покажи
+                </button>
+                <div id="doctor-most-sick" style="margin-top:12px;font-size:18px;font-weight:500;color:#1e3a5f"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                <h2 class="text-sm font-medium text-gray-700 mb-3">Брой пациенти при всеки лекар</h2>
+                <button onclick="loadPatientsCountPerDoctor()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Покажи
+                </button>
+                <div id="patients-count-per-doctor" style="margin-top:12px"></div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Платено от пациенти по лекар</h2>
+            <button onclick="loadPaidPerDoctor()"
+                style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                Покажи
+            </button>
+            <div id="paid-per-doctor-table" style="margin-top:12px"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Брой посещения при всеки лекар</h2>
+            <button onclick="loadVisitsPerDoctor()"
+                style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                Покажи
+            </button>
+            <div id="visits-per-doctor-table" style="margin-top:12px"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-4">
+            <h2 class="text-sm font-medium text-gray-700 mb-3">Прегледи по период</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="period-from"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px"/>
+                <span style="font-size:13px;color:#6b7280">до</span>
+                <input type="date" id="period-to"
+                    style="border:0.5px solid #d1d5db;border-radius:6px;padding:6px 10px;font-size:13px"/>
+                <button onclick="loadExaminationsByPeriod()"
+                    style="background:#1e3a5f;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+                    Търси
+                </button>
+            </div>
+            <div id="examinations-by-period-table" style="margin-top:12px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal - История на пациент -->
+<div id="history-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:10px;padding:24px;width:100%;max-width:700px;margin:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-size:15px;font-weight:500">
+                История на: <span id="history-patient-name" style="color:#166534"></span>
+            </h3>
+            <button onclick="closeModal('history-modal')"
+                style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#6b7280">✕</button>
+        </div>
+        <div id="history-table"></div>
+    </div>
+</div>
+
+<!-- Modal - Редактирай специализации -->
+<div id="edit-doctor-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:10px;padding:24px;width:100%;max-width:440px;margin:auto">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:16px">Редактирай специализации</h3>
+        <input type="hidden" id="edit-doctor-id"/>
+        <input type="hidden" id="edit-doctor-gp"/>
+        <div id="edit-specializations-container" style="margin-bottom:8px"></div>
+        <button onclick="addEditSpec()"
+            style="width:100%;border:0.5px solid #166534;color:#166534;background:transparent;padding:6px;border-radius:6px;font-size:13px;cursor:pointer;margin-bottom:16px">
+            + Добави специализация
+        </button>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button onclick="closeModal('edit-doctor-modal')"
+                style="padding:7px 16px;border:0.5px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;background:white">
+                Отказ
+            </button>
+            <button onclick="saveEditDoctor()"
+                style="padding:7px 16px;background:#1e3a5f;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer">
+                Запази
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal - Редактирай пациент -->
+<div id="edit-patient-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:10px;padding:24px;width:100%;max-width:440px;margin:auto">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:16px">Редактирай пациент</h3>
+        <input type="hidden" id="edit-patient-id"/>
+        <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+                <label style="font-size:12px;color:#6b7280">Име</label>
+                <input type="text" id="edit-patient-name"
+                    style="width:100%;border:0.5px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;margin-top:4px"/>
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280">ЕГН</label>
+                <input type="text" id="edit-patient-egn" maxlength="10"
+                    style="width:100%;border:0.5px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;margin-top:4px"/>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+            <button onclick="closeModal('edit-patient-modal')"
+                style="padding:7px 16px;border:0.5px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;background:white">
+                Отказ
+            </button>
+            <button onclick="saveEditPatient()"
+                style="padding:7px 16px;background:#1e3a5f;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer">
+                Запази
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal - Редактирай диагноза -->
+<div id="edit-examination-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:10px;padding:24px;width:100%;max-width:440px;margin:auto">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:16px">Редактирай диагноза</h3>
+        <input type="hidden" id="edit-examination-id"/>
+        <div>
+            <label style="font-size:12px;color:#6b7280">Диагноза</label>
+            <input type="text" id="edit-examination-diagnosis"
+                style="width:100%;border:0.5px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;margin-top:4px"/>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+            <button onclick="closeModal('edit-examination-modal')"
+                style="padding:7px 16px;border:0.5px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;background:white">
+                Отказ
+            </button>
+            <button onclick="saveEditExamination()"
+                style="padding:7px 16px;background:#1e3a5f;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer">
+                Запази
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal - Редактирай болничен -->
+<div id="edit-sickleave-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:10px;padding:24px;width:100%;max-width:440px;margin:auto">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:16px">Редактирай болничен</h3>
+        <input type="hidden" id="edit-sickleave-id"/>
+        <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+                <label style="font-size:12px;color:#6b7280">Начална дата</label>
+                <input type="date" id="edit-sickleave-startdate"
+                    style="width:100%;border:0.5px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;margin-top:4px"/>
+            </div>
+            <div>
+                <label style="font-size:12px;color:#6b7280">Брой дни</label>
+                <input type="number" id="edit-sickleave-days" min="1" max="365"
+                    style="width:100%;border:0.5px solid #d1d5db;border-radius:6px;padding:7px 10px;font-size:13px;margin-top:4px"/>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+            <button onclick="closeModal('edit-sickleave-modal')"
+                style="padding:7px 16px;border:0.5px solid #d1d5db;border-radius:6px;font-size:13px;cursor:pointer;background:white">
+                Отказ
+            </button>
+            <button onclick="saveEditSickLeave()"
+                style="padding:7px 16px;background:#1e3a5f;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer">
+                Запази
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
